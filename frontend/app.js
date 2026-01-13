@@ -1,5 +1,5 @@
 /**
- * OppaTalent Quiz Generator - Frontend Application
+ * OppaTalent - Frontend Application
  * AI-powered adaptive quiz generation system
  */
 
@@ -70,7 +70,7 @@ function quizApp() {
         
         // Initialize
         init() {
-            console.log('OppaTalent Quiz Generator initialized');
+            console.log('OppaTalent initialized');
             this.setupEventListeners();
         },
         
@@ -225,10 +225,10 @@ function quizApp() {
         
         getUserId() {
             // Get or create user ID for tracking
-            let userId = localStorage.getItem('oppa_user_id');
+            let userId = localStorage.getItem('oppatalent_user_id');
             if (!userId) {
                 userId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                localStorage.setItem('oppa_user_id', userId);
+                localStorage.setItem('oppatalent_user_id', userId);
             }
             return userId;
         },

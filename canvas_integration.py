@@ -159,7 +159,7 @@ class CanvasLTIProvider:
             </imsx_POXEnvelopeRequest>"""
             
             # Generate message ID
-            message_id = f"oppatalent_quiz_{datetime.utcnow().timestamp()}"
+            message_id = f"smartquiz_{datetime.utcnow().timestamp()}"
             
             # Format XML
             xml_data = xml_template.format(
@@ -405,7 +405,7 @@ class CanvasLTIProvider:
         # This is a simplified version
         
         cc_template = """<?xml version="1.0" encoding="UTF-8"?>
-        <manifest identifier="oppatalent_quiz_export" version="1.3"
+        <manifest identifier="smartquiz_export" version="1.3"
                   xmlns="http://www.imsglobal.org/xsd/imsccv1p3/imscp_v1p1">
             <metadata>
                 <schema>IMS Common Cartridge</schema>

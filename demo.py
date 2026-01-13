@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-OppaTalent Quiz Generator - Demo Script
+OppaTalent - Demo Script
 This script showcases the key features relevant to the Instructure AI Software Engineer role
 """
 
@@ -239,12 +239,14 @@ class OppaTalentDemo:
         """Run the complete demo"""
         print(f"{Fore.CYAN}{Style.BRIGHT}")
         print(r"""
-   _____ __  __          _____ _______ ____  _    _ _____ ______
-  / ____|  \/  |   /\   |  __ \__   __/ __ \| |  | |_   _|___  /
- | (___ | \  / |  /  \  | |__) | | | | |  | | |  | | | |    / / 
-  \___ \| |\/| | / /\ \ |  _  /  | | | |  | | |  | | | |   / /  
-  ____) | |  | |/ ____ \| | \ \  | | | |__| | |__| |_| |_ / /__ 
- |_____/|_|  |_/_/    \_\_|  \_\ |_|  \___\_\\____/|_____/_____|
+   ____                   _______    _            _   
+  / __ \                 |__   __|  | |          | |  
+ | |  | |_ __  _ __   __ _  | | __ _| | ___ _ __ | |_ 
+ | |  | | '_ \| '_ \ / _` | | |/ _` | |/ _ \ '_ \| __|
+ | |__| | |_) | |_) | (_| | | | (_| | |  __/ | | | |_ 
+  \____/| .__/| .__/ \__,_| |_|\__,_|_|\___|_| |_|\__|
+        | |   | |                                      
+        |_|   |_|                                      
                                                                  
         AI-Powered Adaptive Learning Platform
         Built for Instructure by Hajnal Garamvolgyi
@@ -276,7 +278,7 @@ class OppaTalentDemo:
             
             # Final message
             self.print_header("DEMO COMPLETE")
-            print(f"{Fore.GREEN}This OppaTalent Quiz Generator demonstrates:")
+            print(f"{Fore.GREEN}OppaTalent demonstrates:")
             print("  ✓ Deep understanding of LLMs and prompt engineering")
             print("  ✓ Educational technology best practices")
             print("  ✓ Scalable, production-ready architecture")

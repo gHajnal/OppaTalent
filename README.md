@@ -1,4 +1,4 @@
-# 🎓 OppaTalent Quiz Generator - AI-Powered Adaptive Learning Platform
+# 🎓 OppaTalent - AI-Powered Adaptive Learning Platform
 
 [![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://python.org)
 [![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4-green.svg)](https://openai.com)
@@ -7,7 +7,7 @@
 
 ## 🚀 Overview
 
-OppaTalent Quiz Generator transforms any educational content into intelligent, adaptive quizzes using advanced AI. Built with educational psychology principles and designed for seamless integration with Learning Management Systems like Canvas LMS.
+OppaTalent transforms any educational content into intelligent, adaptive quizzes using advanced AI. Built with educational psychology principles and designed for seamless integration with Learning Management Systems like Canvas LMS.
 
 ### ✨ Key Features
 
@@ -77,8 +77,8 @@ python app.py
 
 ```bash
 # Build and run with Docker
-docker build -t oppatalent .
-docker run -p 5000:5000 --env-file .env oppatalent
+docker build -t smart-quiz .
+docker run -p 5000:5000 --env-file .env smart-quiz
 ```
 
 ## 🎯 Educational Theory Foundation

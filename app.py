@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-OppaTalent Quiz Generator - Main Application
+OppaTalent - Main Application
 AI-powered adaptive quiz generation for educational content
 """
 
@@ -481,7 +481,7 @@ if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     debug = os.environ.get('ENV', 'development') == 'development'
     
-    logger.info(f"Starting OppaTalent Quiz Generator on port {port}")
+    logger.info(f"Starting OppaTalent on port {port}")
     logger.info(f"Debug mode: {debug}")
     logger.info(f"AI Service: {'Connected' if quiz_gen.check_connection() else 'Not connected'}")
     
