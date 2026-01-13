@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OppaTalent Quiz Generator - AI-Powered Adaptive Learning</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Alpine.js for interactivity -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Chart.js for analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Custom styles -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        .upload-area {
+            border: 2px dashed #cbd5e0;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-area:hover {
+            border-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+        
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background: rgba(118, 75, 162, 0.1);
+        }
+        
+        .question-card {
+            animation: slideIn 0.3s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .bloom-badge {
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .bloom-remember { background: #fef3c7; color: #92400e; }
+        .bloom-understand { background: #dbeafe; color: #1e40af; }
+        .bloom-apply { background: #d1fae5; color: #065f46; }
+        .bloom-analyze { background: #e9d5ff; color: #6b21a8; }
+        .bloom-evaluate { background: #fce7f3; color: #9f1239; }
+        .bloom-create { background: #fee2e2; color: #991b1b; }
+        
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        
+        .ai-glow {
+            box-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div x-data="quizApp()" x-init="init()">
+        <!-- Header -->
+        <header class="gradient-bg text-white shadow-lg">
+            <div class="container mx-auto px-4 py-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-3">
+                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                        </svg>
+                        <div>
+                            <h1 class="text-2xl font-bold">OppaTalent Quiz Generator</h1>
+                            <p class="text-purple-100 text-sm">AI-Powered Adaptive Learning Platform</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <button @click="showAnalytics = true" class="px-4 py-2 bg-white/20 hover:bg-white/30 rounded-lg transition">
+                            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                            Analytics
+                        </button>
+                        <button class="px-4 py-2 bg-white text-purple-600 font-medium rounded-lg hover:bg-purple-50 transition">
+                            Sign In
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="container mx-auto px-4 py-8">
+            <!-- Upload Section -->
+            <div x-show="currentStep === 'upload'" class="max-w-4xl mx-auto">
+                <div class="glass-effect rounded-2xl shadow-xl p-8">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                        📚 Upload Your Learning Material
+                    </h2>
+                    
+                    <!-- Upload Area -->
+                    <div class="upload-area rounded-xl p-12 text-center cursor-pointer"
+                         @dragover.prevent="dragover = true"
+                         @dragleave.prevent="dragover = false"
+                         @drop.prevent="handleDrop($event)"
+                         @click="$refs.fileInput.click()"
+                         :class="{'dragover': dragover}">
+                        
+                        <svg class="w-16 h-16 mx-auto mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                        </svg>
+                        
+                        <p class="text-lg font-medium text-gray-700 mb-2">
+                            Drop your document here or click to browse
+                        </p>
+                        <p class="text-sm text-gray-500">
+                            Supports PDF, DOCX, TXT, and Markdown files (up to 16MB)
+                        </p>
+                        
+                        <input type="file" 
+                               x-ref="fileInput" 
+                               @change="handleFileSelect($event)"
+                               accept=".pdf,.docx,.doc,.txt,.md"
+                               class="hidden">
+                    </div>
+                    
+                    <!-- File Info -->
+                    <div x-show="selectedFile" class="mt-6 p-4 bg-purple-50 rounded-lg">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <svg class="w-8 h-8 text-purple-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9z"/>
+                                </svg>
+                                <div>
+                                    <p class="font-medium text-gray-800" x-text="selectedFile?.name"></p>
+                                    <p class="text-sm text-gray-600" x-text="formatFileSize(selectedFile?.size)"></p>
+                                </div>
+                            </div>
+                            <button @click="selectedFile = null" class="text-red-500 hover:text-red-700">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Quiz Settings -->
+                    <div class="mt-8 space-y-6">
+                        <h3 class="text-lg font-semibold text-gray-800">⚙️ Quiz Configuration</h3>
+                        
+                        <!-- Number of Questions -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Number of Questions
+                            </label>
+                            <div class="flex items-center space-x-4">
+                                <input type="range" 
+                                       x-model="settings.numQuestions"
+                                       min="5" max="20" 
+                                       class="flex-1">
+                                <span class="w-12 text-center font-medium text-purple-600" 
+                                      x-text="settings.numQuestions"></span>
+                            </div>
+                        </div>
+                        
+                        <!-- Learning Mode -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Learning Mode
+                            </label>
+                            <div class="grid grid-cols-3 gap-3">
+                                <button @click="settings.mode = 'adaptive'"
+                                        :class="settings.mode === 'adaptive' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-700'"
+                                        class="py-2 px-4 rounded-lg font-medium transition">
+                                    🎯 Adaptive
+                                </button>
+                                <button @click="settings.mode = 'practice'"
+                                        :class="settings.mode === 'practice' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-700'"
+                                        class="py-2 px-4 rounded-lg font-medium transition">
+                                    📝 Practice
+                                </button>
+                                <button @click="settings.mode = 'exam'"
+                                        :class="settings.mode === 'exam' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-700'"
+                                        class="py-2 px-4 rounded-lg font-medium transition">
+                                    🎓 Exam
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Difficulty Distribution -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Difficulty Distribution (Bloom's Taxonomy)
+                            </label>
+                            <div class="space-y-2">
+                                <template x-for="level in bloomLevels" :key="level.name">
+                                    <div class="flex items-center justify-between">
+                                        <label class="flex items-center space-x-2">
+                                            <input type="checkbox" 
+                                                   :checked="level.enabled"
+                                                   @change="level.enabled = !level.enabled"
+                                                   class="rounded text-purple-600">
+                                            <span class="bloom-badge" :class="'bloom-' + level.name" x-text="level.label"></span>
+                                        </label>
+                                        <span class="text-sm text-gray-600" x-text="level.percentage + '%'"></span>
+                                    </div>
+                                </template>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Generate Button -->
+                    <button @click="generateQuiz()"
+                            :disabled="!selectedFile || loading"
+                            class="w-full mt-8 py-3 px-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-lg hover:from-purple-700 hover:to-pink-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                        <span x-show="!loading">
+                            ✨ Generate Quiz with AI
+                        </span>
+                        <span x-show="loading" class="flex items-center justify-center">
+                            <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"/>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+                            </svg>
+                            Generating Quiz...
+                        </span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quiz Section -->
+            <div x-show="currentStep === 'quiz'" class="max-w-4xl mx-auto">
+                <div class="glass-effect rounded-2xl shadow-xl p-8">
+                    <!-- Quiz Header -->
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-2xl font-bold text-gray-800">
+                            📝 Quiz Time!
+                        </h2>
+                        <div class="flex items-center space-x-4">
+                            <div class="text-center">
+                                <p class="text-sm text-gray-600">Question</p>
+                                <p class="text-lg font-bold text-purple-600">
+                                    <span x-text="currentQuestionIndex + 1"></span> / <span x-text="quiz.questions.length"></span>
+                                </p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-sm text-gray-600">Score</p>
+                                <p class="text-lg font-bold text-green-600" x-text="score"></p>
+                            </div>
+                            <div class="text-center">
+                                <p class="text-sm text-gray-600">Streak</p>
+                                <p class="text-lg font-bold text-orange-600">
+                                    <span x-text="streak"></span> 🔥
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-gray-200 rounded-full h-2 mb-6">
+                        <div class="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full transition-all duration-300"
+                             :style="`width: ${(currentQuestionIndex / quiz.questions.length) * 100}%`"></div>
+                    </div>
+                    
+                    <!-- Question Card -->
+                    <div class="question-card bg-white rounded-xl p-6 shadow-sm">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="bloom-badge" 
+                                  :class="'bloom-' + currentQuestion.bloom_level"
+                                  x-text="currentQuestion.bloom_level"></span>
+                            <span class="text-sm text-gray-500">
+                                Difficulty: 
+                                <template x-for="i in 5">
+                                    <span :class="i <= currentQuestion.difficulty ? 'text-yellow-500' : 'text-gray-300'">★</span>
+                                </template>
+                            </span>
+                        </div>
+                        
+                        <h3 class="text-lg font-medium text-gray-800 mb-6" x-text="currentQuestion.question"></h3>
+                        
+                        <!-- Answer Options -->
+                        <div x-show="currentQuestion.type === 'multiple_choice'" class="space-y-3">
+                            <template x-for="(option, index) in currentQuestion.options" :key="index">
+                                <button @click="selectAnswer(option)"
+                                        :class="getOptionClass(option)"
+                                        :disabled="answered"
+                                        class="w-full text-left p-4 rounded-lg border-2 transition">
+                                    <span x-text="option"></span>
+                                </button>
+                            </template>
+                        </div>
+                        
+                        <div x-show="currentQuestion.type === 'true_false'" class="grid grid-cols-2 gap-4">
+                            <button @click="selectAnswer('true')"
+                                    :class="getOptionClass('true')"
+                                    :disabled="answered"
+                                    class="p-4 rounded-lg border-2 font-medium transition">
+                                ✓ True
+                            </button>
+                            <button @click="selectAnswer('false')"
+                                    :class="getOptionClass('false')"
+                                    :disabled="answered"
+                                    class="p-4 rounded-lg border-2 font-medium transition">
+                                ✗ False
+                            </button>
+                        </div>
+                        
+                        <div x-show="currentQuestion.type === 'short_answer'" class="space-y-3">
+                            <textarea x-model="shortAnswer"
+                                      :disabled="answered"
+                                      rows="4"
+                                      placeholder="Type your answer here..."
+                                      class="w-full p-4 border-2 border-gray-300 rounded-lg focus:border-purple-600 focus:outline-none"></textarea>
+                            <button @click="submitShortAnswer()"
+                                    :disabled="!shortAnswer || answered"
+                                    class="px-6 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                                Submit Answer
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Feedback -->
+                    <div x-show="showFeedback" class="mt-6 p-4 rounded-lg"
+                         :class="isCorrect ? 'bg-green-50 border-2 border-green-200' : 'bg-red-50 border-2 border-red-200'">
+                        <div class="flex items-start space-x-3">
+                            <svg x-show="isCorrect" class="w-6 h-6 text-green-600 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/>
+                            </svg>
+                            <svg x-show="!isCorrect" class="w-6 h-6 text-red-600 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
+                            </svg>
+                            <div class="flex-1">
+                                <p class="font-medium" :class="isCorrect ? 'text-green-800' : 'text-red-800'">
+                                    <span x-text="isCorrect ? 'Correct!' : 'Incorrect'"></span>
+                                </p>
+                                <p class="mt-1 text-sm" :class="isCorrect ? 'text-green-700' : 'text-red-700'"
+                                   x-text="currentQuestion.explanation"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Navigation -->
+                    <div class="mt-8 flex justify-between">
+                        <button @click="previousQuestion()"
+                                :disabled="currentQuestionIndex === 0"
+                                class="px-6 py-2 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                            ← Previous
+                        </button>
+                        <button @click="nextQuestion()"
+                                x-show="currentQuestionIndex < quiz.questions.length - 1"
+                                :disabled="!answered"
+                                class="px-6 py-2 bg-purple-600 text-white font-medium rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition">
+                            Next →
+                        </button>
+                        <button @click="finishQuiz()"
+                                x-show="currentQuestionIndex === quiz.questions.length - 1 && answered"
+                                class="px-6 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium rounded-lg hover:from-purple-700 hover:to-pink-700 transition">
+                            Finish Quiz
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div x-show="currentStep === 'results'" class="max-w-6xl mx-auto">
+                <div class="glass-effect rounded-2xl shadow-xl p-8">
+                    <h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">
+                        🎉 Quiz Complete!
+                    </h2>
+                    
+                    <!-- Score Display -->
+                    <div class="text-center mb-8">
+                        <div class="inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 text-white mb-4">
+                            <div>
+                                <p class="text-4xl font-bold" x-text="Math.round(finalScore) + '%'"></p>
+                                <p class="text-sm">Score</p>
+                            </div>
+                        </div>
+                        <p class="text-lg text-gray-700">
+                            You got <span class="font-bold text-purple-600" x-text="correctAnswers"></span> out of 
+                            <span class="font-bold" x-text="quiz.questions.length"></span> questions correct
+                        </p>
+                    </div>
+                    
+                    <!-- Performance Cards -->
+                    <div class="grid md:grid-cols-3 gap-6 mb-8">
+                        <div class="bg-white rounded-xl p-6 shadow-sm">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">📊 Performance by Topic</h3>
+                            <canvas id="topicChart"></canvas>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-6 shadow-sm">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">🧠 Cognitive Level Analysis</h3>
+                            <canvas id="bloomChart"></canvas>
+                        </div>
+                        
+                        <div class="bg-white rounded-xl p-6 shadow-sm">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">⏱️ Time Analysis</h3>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Total Time:</span>
+                                    <span class="font-medium" x-text="formatTime(totalTime)"></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Avg per Question:</span>
+                                    <span class="font-medium" x-text="formatTime(avgTimePerQuestion)"></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-600">Longest Streak:</span>
+                                    <span class="font-medium" x-text="longestStreak + ' 🔥'"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Insights -->
+                    <div class="bg-purple-50 rounded-xl p-6 mb-8">
+                        <h3 class="text-lg font-semibold text-purple-800 mb-3">💡 Insights & Recommendations</h3>
+                        <ul class="space-y-2">
+                            <template x-for="insight in insights">
+                                <li class="flex items-start space-x-2">
+                                    <svg class="w-5 h-5 text-purple-600 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                                    </svg>
+                                    <span class="text-gray-700" x-text="insight"></span>
+                                </li>
+                            </template>
+                        </ul>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex flex-wrap gap-4 justify-center">
+                        <button @click="generateStudyGuide()"
+                                class="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium rounded-lg hover:from-purple-700 hover:to-pink-700 transition">
+                            📚 Generate Study Guide
+                        </button>
+                        <button @click="exportResults()"
+                                class="px-6 py-3 bg-white border-2 border-purple-600 text-purple-600 font-medium rounded-lg hover:bg-purple-50 transition">
+                            💾 Export Results
+                        </button>
+                        <button @click="retakeQuiz()"
+                                class="px-6 py-3 bg-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-300 transition">
+                            🔄 Retake Quiz
+                        </button>
+                        <button @click="startNew()"
+                                class="px-6 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 transition">
+                            ✨ New Quiz
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- AI Usage Footer -->
+        <footer class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur border-t border-gray-200 py-3 px-4">
+            <div class="container mx-auto flex items-center justify-between text-sm">
+                <div class="flex items-center space-x-6 text-gray-600">
+                    <span>🤖 AI Model: GPT-4</span>
+                    <span>⚡ Tokens: <span x-text="aiUsage.tokens"></span></span>
+                    <span>💰 Cost: $<span x-text="aiUsage.cost.toFixed(3)"></span></span>
+                    <span>⏱️ Response: <span x-text="aiUsage.responseTime"></span>ms</span>
+                </div>
+                <div>
+                    <a href="https://github.com/yourusername/oppatalent" 
+                       target="_blank"
+                       class="text-purple-600 hover:text-purple-800 font-medium">
+                        View on GitHub →
+                    </a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="app.js"></script>
+</body>
+</html>
